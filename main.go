@@ -17,10 +17,12 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"os"
 
+	"github.com/docker/docker/client"
 	"github.com/google/go-containerregistry/pkg/name"
 	"github.com/google/go-containerregistry/pkg/v1/daemon"
 )
@@ -51,6 +53,17 @@ func (i ImageId) String() string {
 
 func main() {
 	image := os.Args[1]
+
+	dc, err := client.NewClientWithOpts(client.FromEnv)
+	if err != nil {
+		log.Panic(err)
+	}
+	in, _, err := dc.ImageInspectWithRaw(context.Background(), image)
+	if err != nil {
+		log.Panic(err)
+	}
+	fmt.Println(in.Architecture)
+
 	img, err := daemon.Image(ImageId{name: image})
 	if err != nil {
 		log.Panic(err)
